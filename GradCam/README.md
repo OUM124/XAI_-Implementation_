@@ -91,7 +91,6 @@ test/       → 80 test images (20 per class)
 | | - `process_attributions()`: Process and visualize gradients |
 | | - `add_edge_to_attributions()`: Overlay edges on heatmaps |
 | | - `display_imagenet_output()`: Show ImageNet predictions |
-| `download.py` | Download utilities (not critical) |
 
 ---
 
@@ -104,71 +103,6 @@ test/       → 80 test images (20 per class)
 | `shark.jpg` (142 KB) | Shark image for ImageNet testing |
 | `shark2.jpg` (127 KB) | Another shark image |
 | `Sushi.png` (10 MB) | Sushi image for demos |
-
----
-
-## 🚀 Quick Start
-
-### 1️⃣ **Load Trained Model**
-```python
-import torch
-import torch.nn as nn
-from torchvision import models
-
-# Create model architecture
-model = models.resnet18(pretrained=False)
-model.fc = nn.Linear(512, 4)
-
-# Load weights
-checkpoint = torch.load('plant_classifier_final.pth')
-model.load_state_dict(checkpoint['model_state_dict'])
-model.eval()
-
-print(f"Classes: {checkpoint['class_names']}")
-print(f"Test Accuracy: {checkpoint['test_acc']:.2f}%")
-```
-
-### 2️⃣ **Run GradCAM**
-```python
-from utils.datasets import ImageDataset
-import glob
-
-# Load test image
-test_paths = glob.glob("./test/*.jpg")
-dataset = ImageDataset(test_paths, num_classes=4)
-image, target = dataset[0]
-
-# Get prediction
-input_tensor = image.unsqueeze(0)
-output = model(input_tensor)
-pred_class = output.argmax(dim=1).item()
-
-# Apply GradCAM (see notebooks for GradCAM class)
-target_layer = model.layer4[-1]
-cam = GradCAM(model, target_layer)
-heatmap = cam(input_tensor, target_class=pred_class)
-```
-
-### 3️⃣ **Generate Confusion Matrix**
-```python
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-
-# Get predictions for all test samples
-y_true, y_pred = [], []
-for i in range(len(dataset)):
-    image, target = dataset[i]
-    true_label = target.argmax().item()
-    pred_label = model(image.unsqueeze(0)).argmax(dim=1).item()
-    y_true.append(true_label)
-    y_pred.append(pred_label)
-
-# Plot confusion matrix
-cm = confusion_matrix(y_true, y_pred)
-sns.heatmap(cm, annot=True, fmt='d',
-            xticklabels=plant_names,
-            yticklabels=plant_names)
-```
 
 ---
 
@@ -194,33 +128,7 @@ sns.heatmap(cm, annot=True, fmt='d',
 
 ---
 
-## 🔍 Common Issues & Solutions
 
-### **Issue 1: RuntimeError with hooks**
-```
-RuntimeError: cannot register a hook on a tensor that doesn't require gradient
-```
-**Solution**: Don't use `torch.no_grad()` when computing GradCAM. Gradients are needed!
-
-### **Issue 2: Path parsing on Windows**
-```
-ValueError: invalid literal for int() with base 10: 'test\\0'
-```
-**Solution**: Already fixed in `utils/datasets.py` using `os.path.basename()`
-
-### **Issue 3: NumPy 2.0 compatibility**
-```
-module compiled using NumPy 1.x cannot run in NumPy 2.0
-```
-**Solution**: Install `numpy<2.0`
-
-### **Issue 4: In-place ReLU conflicts**
-```
-RuntimeError: Output 0 of BackwardHookFunctionBackward is a view and is being modified inplace
-```
-**Solution**: Set `module.inplace = False` for all ReLU layers before registering hooks
-
----
 
 ## 📊 Model Performance
 
@@ -270,13 +178,3 @@ scipy
 
 ---
 
-## 🎓 References
-
-1. **Grad-CAM**: [Selvaraju et al., 2017](https://arxiv.org/abs/1610.02391)
-2. **Guided Backprop**: [Springenberg et al., 2015](https://arxiv.org/abs/1412.6806)
-3. **ResNet**: [He et al., 2016](https://arxiv.org/abs/1512.03385)
-
----
-
-**Last Updated**: January 2026
-**Project Type**: Educational / Research - Explainable AI for Plant Classification
