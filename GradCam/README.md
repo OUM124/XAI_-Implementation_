@@ -29,7 +29,6 @@ test/       → 80 test images (20 per class)
 | File | Description | Test Accuracy |
 |------|-------------|---------------|
 | `plant_classifier_final.pth` | Final ResNet18 model trained on plant dataset | 75.00% |
-| `best_plant_classifier.pth` | Best checkpoint during training | ~75% |
 
 **Model Architecture**: ResNet18 (pretrained on ImageNet, fine-tuned for 4 plant classes)
 
@@ -99,7 +98,6 @@ test/       → 80 test images (20 per class)
 | File | Description |
 |------|-------------|
 | `imagenet_classes.txt` | 1000 ImageNet class names |
-| `sample_image.jpg` (97 KB) | Generic test image |
 | `shark.jpg` (142 KB) | Shark image for ImageNet testing |
 | `shark2.jpg` (127 KB) | Another shark image |
 | `Sushi.png` (10 MB) | Sushi image for demos |
